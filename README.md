@@ -1,0 +1,71 @@
+# GitHub Artifacts Download Proxy
+
+A secure, standalone download page for listing and downloading GitHub Actions artifacts from **Private Repositories**.
+
+It uses a lightweight Node.js proxy to handle GitHub authentication on the server side, allowing you to share a public download link without exposing your GitHub Personal Access Token (PAT).
+
+## Features
+- 🔒 **Secure**: Keeps your GitHub Token safe on the server.
+- 📂 **Auto-Listing**: Fetches the latest build artifacts from your repo.
+- 🎨 **Modern UI**: Clean, dark-mode design with filtering for expired artifacts.
+- 🚀 **Docker Ready**: Easy to deploy on any platform (Dokploy, Portainer, etc.).
+
+## Prerequisites
+- A GitHub Personal Access Token (PAT) with `repo` scope (or `public_repo` if public).
+- Node.js 18+ (for local dev) OR Docker.
+
+## Configuration
+The application is configured via Environment Variables.
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `GITHUB_TOKEN` | **Required**. Your GitHub PAT. | `ghp_abc123...` |
+| `REPO_OWNER` | **Required**. GitHub Username. | `horsley` |
+| `REPO_NAME` | **Required**. Repository Name. | `my-project` |
+| `PORT` | Optional. Server port (default: 3000). | `3000` |
+
+## Quick Start (Docker)
+The easiest way to run the application.
+
+1.  **Build the image** (or skip if pulling from a registry):
+    ```bash
+    docker build -t artifacts-proxy .
+    ```
+
+2.  **Run the container**:
+    ```bash
+    docker run -d \
+      -p 3000:3000 \
+      -e GITHUB_TOKEN=your_token_here \
+      -e REPO_OWNER=your_username \
+      -e REPO_NAME=your_repo_name \
+      --name artifacts-page \
+      artifacts-proxy
+    ```
+
+3.  Visit `http://localhost:3000`.
+
+## Local Development
+
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+
+2.  **Configure Environment**:
+    Copy `.env.example` to `.env` and update it:
+    ```bash
+    cp .env.example .env
+    # Edit .env with your details
+    ```
+
+3.  **Start Server**:
+    ```bash
+    npm run dev
+    ```
+
+## Project Structure
+- `server.js`: Express.js proxy server.
+- `index.html`: The frontend UI.
+- `style.css`: Styling.
+- `Dockerfile`: Container definition.

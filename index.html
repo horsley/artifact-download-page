@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Artifacts</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>Build Artifacts</h1>
+                <p class="subtitle">Download the latest builds from our CI pipeline</p>
+            </div>
+        </header>
+
+        <main id="artifact-list" class="artifact-grid">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                Loading artifacts...
+            </div>
+        </main>
+
+        <footer>
+            <p>Artifacts are retained for 90 days by default. GitHub login required for download.</p>
+        </footer>
+    </div>
+
+    <script>
+
+
+        async function fetchArtifacts() {
+            const listElement = document.getElementById('artifact-list');
+
+            try {
+                // Fetch from own server proxy
+                const response = await fetch('/api/artifacts');
+
+                if (!response.ok) {
+                    throw new Error(`Server Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.artifacts || data.artifacts.length === 0) {
+                    listElement.innerHTML = '<div class="empty-state">No artifacts found.</div>';
+                    return;
+                }
+
+                renderArtifacts(data.artifacts);
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                listElement.innerHTML = `
+                    <div class="error-state">
+                        <h3>Failed to load artifacts</h3>
+                        <p>Ensure the backend server is running and configured correctly.</p>
+                        <p class="error-details">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderArtifacts(artifacts) {
+            const listElement = document.getElementById('artifact-list');
+            listElement.innerHTML = '';
+
+            // Filter out expired artifacts if necessary, or just show them.
+            // GitHub API returns 'expired' boolean.
+
+            artifacts.forEach(artifact => {
+                const date = new Date(artifact.created_at);
+                const dateString = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                const timeString = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+                const sizeMb = (artifact.size_in_bytes / (1024 * 1024)).toFixed(2);
+
+                const card = document.createElement('div');
+                card.className = `cards-item ${artifact.expired ? 'expired' : ''}`;
+
+                // Use proxy download URL: /api/download/:id
+                const downloadUrl = `/api/download/${artifact.id}`;
+
+                card.innerHTML = `
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h2 class="artifact-name" title="${artifact.name}">${artifact.name}</h2>
+                            <span class="artifact-size">${sizeMb} MB</span>
+                        </div>
+                        <div class="card-meta">
+                            <span class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                ${dateString} <small>${timeString}</small>
+                            </span>
+                            <span class="meta-item id-badge">ID: ${artifact.id}</span>
+                        </div>
+                        <div class="card-actions">
+                            ${artifact.expired
+                        ? '<button class="btn btn-disabled" disabled>Expired</button>'
+                        : `<a href="${downloadUrl}" class="btn btn-primary" download>
+                                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                   Download
+                                   </a>`
+                    }
+                        </div>
+                    </div>
+                `;
+
+                listElement.appendChild(card);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', fetchArtifacts);
+    </script>
+</body>
+
+</html>
