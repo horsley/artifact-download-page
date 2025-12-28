@@ -35,6 +35,8 @@
     <script>
 
 
+        let pollingInterval = null;
+
         async function fetchArtifacts() {
             const listElement = document.getElementById('artifact-list');
 
@@ -50,20 +52,40 @@
 
                 if (!data.artifacts || data.artifacts.length === 0) {
                     listElement.innerHTML = '<div class="empty-state">No artifacts found.</div>';
+                    managePolling(false); // Stop polling if empty
                     return;
                 }
 
                 renderArtifacts(data.artifacts);
 
+                // Check if any artifacts are pending
+                const hasPending = data.artifacts.some(a => a.is_pending);
+                managePolling(hasPending);
+
             } catch (error) {
                 console.error('Fetch error:', error);
-                listElement.innerHTML = `
-                    <div class="error-state">
-                        <h3>Failed to load artifacts</h3>
-                        <p>Ensure the backend server is running and configured correctly.</p>
-                        <p class="error-details">${error.message}</p>
-                    </div>
-                `;
+
+                // Don't overwrite error state if we are just polling in background
+                if (!pollingInterval || listElement.querySelector('.loading-state')) {
+                    listElement.innerHTML = `
+                        <div class="error-state">
+                            <h3>Failed to load artifacts</h3>
+                            <p>Ensure the backend server is running and configured correctly.</p>
+                            <p class="error-details">${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function managePolling(shouldPoll) {
+            if (shouldPoll && !pollingInterval) {
+                console.log('Starting polling for pending builds (1 min interval)...');
+                pollingInterval = setInterval(fetchArtifacts, 60000);
+            } else if (!shouldPoll && pollingInterval) {
+                console.log('All builds finished. Stopping polling.');
+                clearInterval(pollingInterval);
+                pollingInterval = null;
             }
         }
 
