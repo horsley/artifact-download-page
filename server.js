@@ -49,37 +49,54 @@ app.get('/api/artifacts', async (req, res) => {
     }
 });
 
-// API: Download Artifact (Redirect Strategy)
+// API: Download Artifact
 app.get('/api/download/:id', async (req, res) => {
     const artifactId = req.params.id;
+    const downloadMode = process.env.DOWNLOAD_MODE || 'redirect'; // 'redirect' (default) or 'proxy'
+
     try {
-        // 1. Request the download URL but DO NOT follow the redirect
-        const response = await axios.get(
-            `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/artifacts/${artifactId}/zip`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${GITHUB_TOKEN}`,
-                },
-                maxRedirects: 0, // ⛔ Stop axios from following the redirect
-                validateStatus: function (status) {
-                    return status >= 200 && status < 400; // Accept 302 as success
+        if (downloadMode === 'proxy') {
+            // PROXY MODE: Server downloads and streams to client
+            // Use this if direct access to GitHub is blocked for clients
+            const response = await axios.get(
+                `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/artifacts/${artifactId}/zip`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                    },
+                    responseType: 'stream',
+                    maxRedirects: 5
                 }
-            }
-        );
+            );
 
-        // 2. Get the actual storage URL from the 'Location' header
-        const signedUrl = response.headers.location;
+            res.setHeader('Content-Type', 'application/zip');
+            // Suggest a filename based on ID, real name is hard to get without another API call or passed param
+            res.setHeader('Content-Disposition', `attachment; filename="artifact-${artifactId}.zip"`);
+            response.data.pipe(res);
 
-        if (!signedUrl) {
-            throw new Error('No redirect location found from GitHub API');
+        } else {
+            // REDIRECT MODE (Default): Redirect client to GitHub's signed URL
+            // Faster, saves bandwidth, requires client to reach GitHub
+            const response = await axios.get(
+                `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/artifacts/${artifactId}/zip`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                    },
+                    maxRedirects: 0,
+                    validateStatus: function (status) {
+                        return status >= 200 && status < 400;
+                    }
+                }
+            );
+
+            const signedUrl = response.headers.location;
+            if (!signedUrl) throw new Error('No redirect location found');
+            res.redirect(signedUrl);
         }
 
-        // 3. Redirect the user to the signed URL (Direct Download)
-        // This way, traffic goes from GitHub -> User, not GitHub -> Server -> User
-        res.redirect(signedUrl);
-
     } catch (error) {
-        console.error('❌ Error getting download link:');
+        console.error(`❌ Error downloading artifact (Mode: ${downloadMode}):`);
         console.error(`   Status: ${error.response?.status}`);
         res.status(500).json({ error: 'Failed to retrieve download link' });
     }
@@ -88,4 +105,5 @@ app.get('/api/download/:id', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`✅ Server running at http://localhost:${PORT}`);
     console.log(`   Serving artifacts for: ${REPO_OWNER}/${REPO_NAME}`);
+    console.log(`   Download Mode: ${process.env.DOWNLOAD_MODE || 'redirect'}`);
 });

@@ -42,7 +42,12 @@ The application is configured via Environment Variables.
 | `GITHUB_TOKEN` | **Required**. Your GitHub PAT. | `ghp_abc123...` |
 | `REPO_OWNER` | **Required**. GitHub Username. | `horsley` |
 | `REPO_NAME` | **Required**. Repository Name. | `my-project` |
+| `DOWNLOAD_MODE` | `redirect` (Default) or `proxy`. | `redirect` |
 | `PORT` | Optional. Server port (default: 3000). | `3000` |
+
+### Download Modes
+- **redirect** (Default): Redirects user to GitHub's signed URL. Faster, saves server bandwidth.
+- **proxy**: Server downloads and streams the file to user. Use if users cannot access GitHub directly.
 
 ## Quick Start (Docker)
 The easiest way to run the application.
