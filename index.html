@@ -74,9 +74,6 @@
             // Sort by date (latest first)
             artifacts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-            // Create Header Row (Optional, but good for lists)
-            // const header = document.createElement('div'); ... (Skipping for cleaner look as requested "just a list")
-
             artifacts.forEach(artifact => {
                 const date = new Date(artifact.created_at);
                 const dateString = date.toLocaleDateString(undefined, { year: 'numeric', month: 'numeric', day: 'numeric' });
@@ -88,10 +85,25 @@
 
                 const downloadUrl = `/api/download/${artifact.id}`;
 
+                let actionHtml = '';
+                if (artifact.is_pending) {
+                    actionHtml = `<span class="status-pending"><span class="spinner-small"></span> Building...</span>`;
+                } else if (artifact.expired) {
+                    actionHtml = '<span class="status-expired">Expired</span>';
+                } else {
+                    actionHtml = `<a href="${downloadUrl}" class="btn-download" download>
+                        Download
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </a>`;
+                }
+
                 item.innerHTML = `
                     <div class="item-info basic-info">
-                        <div class="artifact-name" title="${artifact.name}">${artifact.name}</div>
-                        <span class="artifact-size">${sizeMb} MB</span>
+                        <div class="artifact-name" title="${artifact.name}">
+                            ${artifact.name}
+                            ${artifact.is_pending ? '<span class="tag-live">LIVE</span>' : ''}
+                        </div>
+                        ${artifact.is_pending ? '' : `<span class="artifact-size">${sizeMb} MB</span>`}
                     </div>
                     
                     <div class="item-info time-info">
@@ -100,13 +112,7 @@
                     </div>
 
                     <div class="item-actions">
-                         ${artifact.expired
-                        ? '<span class="status-expired">Expired</span>'
-                        : `<a href="${downloadUrl}" class="btn-download" download>
-                               Download
-                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                               </a>`
-                    }
+                         ${actionHtml}
                     </div>
                 `;
 
