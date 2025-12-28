@@ -14,6 +14,26 @@ It uses a lightweight Node.js proxy to handle GitHub authentication on the serve
 - A GitHub Personal Access Token (PAT) with `repo` scope (or `public_repo` if public).
 - Node.js 18+ (for local dev) OR Docker.
 
+## 🔑 GitHub Token Generation
+
+You need a Personal Access Token (PAT) for the server to access your artifacts.
+
+### Option A: Fine-grained Token (Recommended)
+1.  Go to **Settings** > **Developer settings** > **Personal access tokens** > **Fine-grained tokens**.
+2.  Click **Generate new token**.
+3.  **Repository access**: Select **"Only select repositories"** and choose your target repository.
+4.  **Permissions**:
+    - Click **Repository permissions**.
+    - Find **Actions** and select **Read-only**.
+    - (Metadata permission is selected automatically).
+
+### Option B: Classic Token
+1.  Go to **Settings** > **Developer settings** > **Personal access tokens** > **Tokens (classic)**.
+2.  Click **Generate new token (classic)**.
+3.  **Scopes**:
+    - **Private Repo**: Check `repo` (Full control of private repositories).
+    - **Public Repo**: Check `public_repo`.
+
 ## Configuration
 The application is configured via Environment Variables.
 
