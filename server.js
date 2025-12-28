@@ -23,7 +23,9 @@ app.use(express.static(path.join(__dirname)));
 app.get('/api/artifacts', async (req, res) => {
     try {
         const limit = process.env.ARTIFACT_LIMIT || 10;
-        const response = await axios.get(
+
+        // 1. Fetch Completed Artifacts
+        const artifactsPromise = axios.get(
             `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/artifacts?per_page=${limit}`,
             {
                 headers: {
@@ -32,7 +34,44 @@ app.get('/api/artifacts', async (req, res) => {
                 }
             }
         );
-        res.json(response.data);
+
+        // 2. Fetch In-Progress Workflow Runs
+        // We only care about 'in_progress' or 'queued' status
+        const runsPromise = axios.get(
+            `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs?status=in_progress&per_page=5`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                }
+            }
+        );
+
+        const [artifactsRes, runsRes] = await Promise.all([artifactsPromise, runsPromise]);
+
+        const artifacts = artifactsRes.data.artifacts || [];
+        const runs = runsRes.data.workflow_runs || [];
+
+        // 3. Convert Runs to "Pending Artifact" objects
+        const pendingArtifacts = runs.map(run => ({
+            id: `run-${run.id}`, // Fake ID
+            name: run.name || 'Building...',
+            created_at: run.created_at, // Started at
+            size_in_bytes: 0,
+            expired: false,
+            is_pending: true, // Marker for frontend
+            workflow_run: { id: run.id }
+        }));
+
+        // 4. Merge and Sort (Latest first)
+        const allItems = [...pendingArtifacts, ...artifacts].sort((a, b) =>
+            new Date(b.created_at) - new Date(a.created_at)
+        );
+
+        // Respect limit after merge (optional, but keeps list clean)
+        const finalItems = allItems.slice(0, limit);
+
+        res.json({ artifacts: finalItems });
     } catch (error) {
         console.error('❌ Error fetching artifacts:');
         console.error(`   Status: ${error.response?.status}`);

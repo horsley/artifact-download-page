@@ -84,7 +84,7 @@
                 const sizeMb = (artifact.size_in_bytes / (1024 * 1024)).toFixed(2);
 
                 const item = document.createElement('div');
-                item.className = `list-item ${artifact.expired ? 'expired' : ''}`;
+                item.className = `list-item ${artifact.expired ? 'expired' : ''} ${artifact.is_pending ? 'pending-item' : ''}`;
 
                 const downloadUrl = `/api/download/${artifact.id}`;
 

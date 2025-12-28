@@ -91,7 +91,8 @@ h1 {
 .basic-info {
     flex: 2;
     gap: 1rem;
-    min-width: 0; /* Text truncation handling */
+    min-width: 0;
+    /* Text truncation handling */
 }
 
 .artifact-name {
@@ -118,7 +119,8 @@ h1 {
     color: var(--text-secondary);
     font-size: 0.9rem;
     gap: 6px;
-    justify-content: center; /* Center align time */
+    justify-content: center;
+    /* Center align time */
 }
 
 .item-actions {
@@ -155,7 +157,9 @@ h1 {
 }
 
 /* States */
-.loading-state, .error-state, .empty-state {
+.loading-state,
+.error-state,
+.empty-state {
     text-align: center;
     padding: 4rem 1rem;
     color: var(--text-secondary);
@@ -164,7 +168,7 @@ h1 {
 .spinner {
     width: 30px;
     height: 30px;
-    border: 3px solid rgba(255,255,255,0.1);
+    border: 3px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
     border-top-color: #58a6ff;
     animation: spin 1s ease-in-out infinite;
@@ -180,8 +184,23 @@ footer {
 }
 
 /* Animations */
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 /* Mobile */
 @media (max-width: 700px) {
@@ -190,23 +209,73 @@ footer {
         align-items: flex-start;
         gap: 0.5rem;
     }
-    
+
     .basic-info {
         width: 100%;
         justify-content: space-between;
     }
-    
+
     .time-info {
         justify-content: flex-start;
         font-size: 0.8rem;
     }
-    
+
     .item-actions {
         width: 100%;
     }
-    
+
     .btn-download {
         width: 100%;
         justify-content: center;
+    }
+}
+
+/* Pending Build Styles */
+.list-item.pending-item {
+    border-color: #d2a8ff;
+    background: rgba(56, 139, 253, 0.05);
+}
+
+.status-pending {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #d2a8ff;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.spinner-small {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(210, 168, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #d2a8ff;
+    animation: spin 1s linear infinite;
+}
+
+.tag-live {
+    background: #d2a8ff;
+    color: #0d1117;
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+    font-weight: 700;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
     }
 }
