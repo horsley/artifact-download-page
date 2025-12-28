@@ -60,7 +60,10 @@ app.get('/api/artifacts', async (req, res) => {
             size_in_bytes: 0,
             expired: false,
             is_pending: true, // Marker for frontend
-            workflow_run: { id: run.id }
+            workflow_run: {
+                id: run.id,
+                head_branch: run.head_branch // Pass branch name
+            }
         }));
 
         // 4. Merge and Sort (Latest first)

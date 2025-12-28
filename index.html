@@ -84,6 +84,7 @@
                 item.className = `list-item ${artifact.expired ? 'expired' : ''} ${artifact.is_pending ? 'pending-item' : ''}`;
 
                 const downloadUrl = `/api/download/${artifact.id}`;
+                const branchName = artifact.workflow_run?.head_branch || 'unknown';
 
                 let actionHtml = '';
                 if (artifact.is_pending) {
@@ -102,6 +103,10 @@
                         <div class="artifact-name" title="${artifact.name}">
                             ${artifact.name}
                             ${artifact.is_pending ? '<span class="tag-live">LIVE</span>' : ''}
+                            <span class="tag-branch" title="Source Branch: ${branchName}">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+                                ${branchName}
+                            </span>
                         </div>
                         ${artifact.is_pending ? '' : `<span class="artifact-size">${sizeMb} MB</span>`}
                     </div>
