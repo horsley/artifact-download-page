@@ -90,9 +90,27 @@ h1 {
 
 .basic-info {
     flex: 2;
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    /* Space between rows */
     min-width: 0;
-    /* Text truncation handling */
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.primary-row {
+    min-width: 0;
+    /* For truncation */
+}
+
+.secondary-row {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
 }
 
 .artifact-name {
@@ -105,9 +123,10 @@ h1 {
 }
 
 .artifact-size {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
+    /* Slightly smaller for secondary row */
     background: rgba(110, 118, 129, 0.4);
-    padding: 2px 8px;
+    padding: 1px 6px;
     border-radius: 99px;
     color: var(--text-primary);
     white-space: nowrap;
@@ -260,7 +279,6 @@ footer {
     font-size: 0.7rem;
     padding: 1px 6px;
     border-radius: 4px;
-    margin-left: 8px;
     vertical-align: middle;
     font-weight: 700;
     animation: pulse 2s infinite;
