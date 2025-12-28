@@ -33,8 +33,19 @@ app.get('/api/artifacts', async (req, res) => {
         );
         res.json(response.data);
     } catch (error) {
-        console.error('Error fetching artifacts:', error.message);
-        res.status(error.response?.status || 500).json({ error: 'Failed to fetch artifacts' });
+        console.error('❌ Error fetching artifacts:');
+        console.error(`   Status: ${error.response?.status}`);
+        console.error(`   URL: ${error.config?.url}`);
+        console.error('   Response:', JSON.stringify(error.response?.data, null, 2));
+        
+        if (error.response?.status === 404) {
+             console.error('💡 TIP: 404 usually means:');
+             console.error('   1. REPO_OWNER or REPO_NAME is incorrect in .env');
+             console.error('   2. GITHUB_TOKEN is invalid');
+             console.error('   3. GITHUB_TOKEN does not have "repo" scope (required for private repos)');
+        }
+
+        res.status(error.response?.status || 500).json({ error: 'Failed to fetch artifacts', details: error.response?.data });
     }
 });
 
