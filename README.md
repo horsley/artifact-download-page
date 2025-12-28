@@ -43,6 +43,7 @@ The application is configured via Environment Variables.
 | `REPO_OWNER` | **Required**. GitHub Username. | `horsley` |
 | `REPO_NAME` | **Required**. Repository Name. | `my-project` |
 | `DOWNLOAD_MODE` | `redirect` (Default) or `proxy`. | `redirect` |
+| `ARTIFACT_LIMIT` | Max artifacts to show. Default `10`. | `10` |
 | `PORT` | Optional. Server port (default: 3000). | `3000` |
 
 ### Download Modes

@@ -22,8 +22,9 @@ app.use(express.static(path.join(__dirname)));
 // API: List Artifacts
 app.get('/api/artifacts', async (req, res) => {
     try {
+        const limit = process.env.ARTIFACT_LIMIT || 10;
         const response = await axios.get(
-            `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/artifacts?per_page=30`,
+            `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/artifacts?per_page=${limit}`,
             {
                 headers: {
                     'Authorization': `Bearer ${GITHUB_TOKEN}`,
