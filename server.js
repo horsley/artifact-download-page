@@ -57,7 +57,19 @@ app.get('/api/download/:id', async (req, res) => {
     try {
         if (downloadMode === 'proxy') {
             // PROXY MODE: Server downloads and streams to client
-            // Use this if direct access to GitHub is blocked for clients
+
+            // 1. Fetch Metadata (to get Name and Size)
+            const metadataResponse = await axios.get(
+                `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/artifacts/${artifactId}`,
+                {
+                    headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
+                }
+            );
+
+            const artifactName = metadataResponse.data.name;
+            const artifactSize = metadataResponse.data.size_in_bytes;
+
+            // 2. Start Stream
             const response = await axios.get(
                 `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/artifacts/${artifactId}/zip`,
                 {
@@ -69,9 +81,15 @@ app.get('/api/download/:id', async (req, res) => {
                 }
             );
 
+            // 3. Set Headers for Progress and Filename
             res.setHeader('Content-Type', 'application/zip');
-            // Suggest a filename based on ID, real name is hard to get without another API call or passed param
-            res.setHeader('Content-Disposition', `attachment; filename="artifact-${artifactId}.zip"`);
+            // Encode filename to handle special characters
+            const filename = encodeURIComponent(artifactName + '.zip');
+            res.setHeader('Content-Disposition', `attachment; filename="${artifactName}.zip"; filename*=UTF-8''${filename}`);
+            if (artifactSize) {
+                res.setHeader('Content-Length', artifactSize);
+            }
+
             response.data.pipe(res);
 
         } else {
