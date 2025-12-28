@@ -284,6 +284,16 @@ footer {
     animation: pulse 2s infinite;
 }
 
+.meta-divider {
+    margin: 0 4px;
+    color: var(--border-color);
+}
+
+.meta-time {
+    display: inline-flex;
+    align-items: center;
+}
+
 @keyframes pulse {
     0% {
         opacity: 1;

@@ -110,16 +110,18 @@
                                 ${branchName}
                             </span>
                             ${artifact.is_pending ? '' : `<span class="artifact-size">${sizeMb} MB</span>`}
+                            
+                            <span class="meta-divider">&middot;</span>
+                            
+                            <span class="meta-time" title="Created at ${dateString} ${timeString}">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                ${dateString} ${timeString}
+                            </span>
                         </div>
-                    </div>
-                    
-                    <div class="item-info time-info">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        ${dateString} ${timeString}
                     </div>
 
                     <div class="item-actions">
-                         ${actionHtml}
+                        ${actionHtml}
                     </div>
                 `;
 
